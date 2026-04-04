@@ -4,15 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DelimitIt</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="styles.css" />
   <script defer src="app.js"></script>
 </head>
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <h1 class="app-title">
-        <span class="app-title-delimit">Delimit</span><span class="app-title-it">It</span>
-      </h1>
+      <div class="brand-lockup">
+        <img src="favicon.png" alt="" class="brand-mark" aria-hidden="true" />
+        <h1 class="app-title">
+          <span class="app-title-delimit">Delimit</span><span class="app-title-it">It</span>
+        </h1>
+      </div>
       <button id="themeToggle" class="btn btn-icon" aria-label="Switch to dark mode" aria-pressed="false">
         <svg class="icon icon-sun" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="5"/>
@@ -72,10 +76,10 @@
         <legend class="option-label">Input Mode</legend>
         <div class="radio-group">
           <label class="radio-label">
-            <input type="radio" name="inputMode" value="nonnumeric" /> Non-numeric
+            <input type="radio" name="inputMode" value="numeric" checked /> Numeric
           </label>
           <label class="radio-label">
-            <input type="radio" name="inputMode" value="numeric" checked /> Numeric
+            <input type="radio" name="inputMode" value="nonnumeric" /> Non-numeric
           </label>
         </div>
       </fieldset>
@@ -92,6 +96,15 @@
           aria-describedby="ignoreHint"
         />
         <span id="ignoreHint" class="hint-text">Characters to keep inside tokens (not treated as delimiters)</span>
+      </div>
+
+      <div class="option-group option-group-actions" aria-label="Preference actions">
+        <span class="option-label">Preferences</span>
+        <div class="button-row">
+          <button id="savePrefsBtn" class="btn btn-secondary btn-sm" type="button">Save Preferences</button>
+          <button id="resetPrefsBtn" class="btn btn-secondary btn-sm" type="button">Reset Defaults</button>
+        </div>
+        <span class="hint-text">Save your conversion settings for future visits or restore the app defaults.</span>
       </div>
 
     </section><!-- /options-bar -->
@@ -180,7 +193,15 @@
   <div id="statusMsg" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
   <footer class="site-footer">
-    <p>DelimitIt &mdash; Convert any text to a delimited list</p>
+    <div class="footer-inner">
+      <p class="footer-tagline">DelimitIt converts messy text into a clean delimited list for reuse in spreadsheets, SQL, and other tools.</p>
+      <nav class="footer-links" aria-label="Project links">
+        <a href="https://github.com/SimplePotential/DelimitIt" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+        <a href="https://github.com/SimplePotential/DelimitIt/issues" target="_blank" rel="noopener noreferrer">Report an Issue or Ask a Question</a>
+        <a href="mailto:admin@SimplePotential.com">Email for General Questions</a>
+        <a href="LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+      </nav>
+    </div>
   </footer>
 
 </body>

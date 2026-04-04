@@ -20,8 +20,18 @@ const importBtn     = document.getElementById('importBtn');
 const fileInput     = document.getElementById('fileInput');
 const delimiterInput = document.getElementById('delimiter');
 const ignoreCharsInput = document.getElementById('ignoreChars');
+const savePrefsBtn  = document.getElementById('savePrefsBtn');
+const resetPrefsBtn = document.getElementById('resetPrefsBtn');
 const ignoreGroup   = document.getElementById('ignoreGroup');
 const statusMsg     = document.getElementById('statusMsg');
+
+const PREFERENCES_KEY = 'delimitit-preferences';
+const DEFAULT_PREFERENCES = {
+  delimiter: ',',
+  quoteStyle: 'none',
+  inputMode: 'numeric',
+  ignoreChars: ''
+};
 
 // ---------------------------------------------------------
 //  Theme Management
@@ -31,6 +41,10 @@ const statusMsg     = document.getElementById('statusMsg');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const theme = stored || (prefersDark ? 'dark' : 'light');
   applyTheme(theme, false);
+})();
+
+(function initPreferences() {
+  applyPreferences(loadSavedPreferences());
 })();
 
 function applyTheme(theme, persist = true) {
@@ -76,7 +90,7 @@ delimiterInput.addEventListener('input', () => {
 // ---------------------------------------------------------
 function getInputMode() {
   const checked = document.querySelector('input[name="inputMode"]:checked');
-  return checked ? checked.value : 'nonnumeric';
+  return checked ? checked.value : DEFAULT_PREFERENCES.inputMode;
 }
 
 function syncIgnoreGroupVisibility() {
@@ -90,6 +104,16 @@ document.querySelectorAll('input[name="inputMode"]').forEach((radio) => {
 
 // Run once on load to set correct initial state
 syncIgnoreGroupVisibility();
+
+savePrefsBtn.addEventListener('click', () => {
+  savePreferences(getOptions());
+  announce('Preferences saved.');
+});
+
+resetPrefsBtn.addEventListener('click', () => {
+  resetPreferences();
+  announce('Preferences reset to defaults.');
+});
 
 // ---------------------------------------------------------
 //  Tokenizers
@@ -180,13 +204,65 @@ function buildOutput(tokens, delimiter, quoteStyle) {
 function getOptions() {
   const delimiterValue = delimiterInput.value;
   // If the field is empty, fallback to comma
-  const delimiter = delimiterValue.length === 0 ? ',' : delimiterValue;
+  const delimiter = delimiterValue.length === 0 ? DEFAULT_PREFERENCES.delimiter : delimiterValue;
 
   const quoteStyle = document.querySelector('input[name="quoteStyle"]:checked').value;
   const inputMode  = getInputMode();
   const ignoreChars = ignoreCharsInput.value; // raw chars string
 
   return { delimiter, quoteStyle, inputMode, ignoreChars };
+}
+
+function loadSavedPreferences() {
+  const stored = localStorage.getItem(PREFERENCES_KEY);
+  if (!stored) return DEFAULT_PREFERENCES;
+
+  try {
+    const parsed = JSON.parse(stored);
+    return {
+      delimiter: typeof parsed.delimiter === 'string' && parsed.delimiter.length > 0
+        ? parsed.delimiter
+        : DEFAULT_PREFERENCES.delimiter,
+      quoteStyle: ['none', 'single', 'double'].includes(parsed.quoteStyle)
+        ? parsed.quoteStyle
+        : DEFAULT_PREFERENCES.quoteStyle,
+      inputMode: ['numeric', 'nonnumeric'].includes(parsed.inputMode)
+        ? parsed.inputMode
+        : DEFAULT_PREFERENCES.inputMode,
+      ignoreChars: typeof parsed.ignoreChars === 'string'
+        ? parsed.ignoreChars
+        : DEFAULT_PREFERENCES.ignoreChars
+    };
+  } catch {
+    return DEFAULT_PREFERENCES;
+  }
+}
+
+function applyPreferences(preferences) {
+  delimiterInput.value = preferences.delimiter;
+  ignoreCharsInput.value = preferences.ignoreChars;
+
+  const quoteStyleRadio = document.querySelector(`input[name="quoteStyle"][value="${preferences.quoteStyle}"]`);
+  const inputModeRadio = document.querySelector(`input[name="inputMode"][value="${preferences.inputMode}"]`);
+
+  if (quoteStyleRadio) {
+    quoteStyleRadio.checked = true;
+  }
+
+  if (inputModeRadio) {
+    inputModeRadio.checked = true;
+  }
+
+  syncIgnoreGroupVisibility();
+}
+
+function savePreferences(preferences) {
+  localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+}
+
+function resetPreferences() {
+  localStorage.removeItem(PREFERENCES_KEY);
+  applyPreferences(DEFAULT_PREFERENCES);
 }
 
 // ---------------------------------------------------------
