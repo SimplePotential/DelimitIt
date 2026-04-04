@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="application-name" content="DelimitIt" />
+  <meta name="author" content="Kasey Sheffler" />
+  <meta name="owner" content="https://SimplePotential.com" />
+  <meta name="reply-to" content="admin@SimplePotential.com" />
+  <meta name="description" content="DelimitIt converts messy text into a clean delimited list for reuse in spreadsheets, SQL, and other tools." />
+  <meta name="keywords" content="delimiter, CSV, TSV, text cleanup, SQL, spreadsheet, token parser" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f4f6f9" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f6f9" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
   <title>DelimitIt</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="styles.css" />
   <script defer src="app.js"></script>
 </head>
@@ -12,28 +22,43 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="brand-lockup">
-        <img src="favicon.png" alt="" class="brand-mark" aria-hidden="true" />
+        <img src="logo.png" alt="" class="brand-mark" aria-hidden="true" />
         <h1 class="app-title">
           <span class="app-title-delimit">Delimit</span><span class="app-title-it">It</span>
         </h1>
       </div>
-      <button id="themeToggle" class="btn btn-icon" aria-label="Switch to dark mode" aria-pressed="false">
-        <svg class="icon icon-sun" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <svg class="icon icon-moon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <span class="theme-label">Dark</span>
-      </button>
+      <div class="header-actions">
+        <button id="themeToggle" class="btn btn-icon" aria-label="Switch to dark mode" aria-pressed="false">
+          <svg class="icon icon-sun" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon icon-moon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span class="theme-label">Dark</span>
+        </button>
+
+        <details id="preferencesMenu" class="preferences-menu">
+          <summary id="preferencesToggle" class="btn btn-icon preferences-toggle" aria-haspopup="menu" aria-expanded="false" aria-label="Open preferences menu">
+            <span class="preferences-label">PREFERENCES</span>
+            <svg class="icon preferences-caret" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </summary>
+          <div class="preferences-menu-panel" role="menu" aria-label="Preferences actions">
+            <button id="savePrefsBtn" class="preferences-menu-item" type="button" role="menuitem">SAVE PREFERENCES</button>
+            <button id="resetPrefsBtn" class="preferences-menu-item" type="button" role="menuitem">RESET DEFAULTS</button>
+          </div>
+        </details>
+      </div>
     </div>
   </header>
 
@@ -97,16 +122,6 @@
         />
         <span id="ignoreHint" class="hint-text">Characters to keep inside tokens (not treated as delimiters)</span>
       </div>
-
-      <div class="option-group option-group-actions" aria-label="Preference actions">
-        <span class="option-label">Preferences</span>
-        <div class="button-row">
-          <button id="savePrefsBtn" class="btn btn-secondary btn-sm" type="button">Save Preferences</button>
-          <button id="resetPrefsBtn" class="btn btn-secondary btn-sm" type="button">Reset Defaults</button>
-        </div>
-        <span class="hint-text">Save your conversion settings for future visits or restore the app defaults.</span>
-      </div>
-
     </section><!-- /options-bar -->
 
     <!-- Text Panels -->
@@ -198,8 +213,7 @@
       <nav class="footer-links" aria-label="Project links">
         <a href="https://github.com/SimplePotential/DelimitIt" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
         <a href="https://github.com/SimplePotential/DelimitIt/issues" target="_blank" rel="noopener noreferrer">Report an Issue or Ask a Question</a>
-        <a href="mailto:admin@SimplePotential.com">Email for General Questions</a>
-        <a href="LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        <a href="https://github.com/SimplePotential/DelimitIt/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
       </nav>
     </div>
   </footer>

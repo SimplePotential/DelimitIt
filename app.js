@@ -10,6 +10,8 @@
 //  DOM References
 // ---------------------------------------------------------
 const themeToggle   = document.getElementById('themeToggle');
+const preferencesMenu = document.getElementById('preferencesMenu');
+const preferencesToggle = document.getElementById('preferencesToggle');
 const inputText     = document.getElementById('inputText');
 const outputText    = document.getElementById('outputText');
 const convertBtn    = document.getElementById('convertBtn');
@@ -52,14 +54,45 @@ function applyTheme(theme, persist = true) {
   const isDark = theme === 'dark';
   themeToggle.setAttribute('aria-pressed', String(isDark));
   themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  updateThemeMeta(theme);
   if (persist) {
     localStorage.setItem('delimitit-theme', theme);
   }
 }
 
+function updateThemeMeta(theme) {
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (!themeColorMeta) return;
+  themeColorMeta.setAttribute('content', theme === 'dark' ? '#111827' : '#f4f6f9');
+}
+
 themeToggle.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+preferencesToggle.addEventListener('click', () => {
+  const isOpen = preferencesMenu.hasAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', String(!isOpen));
+});
+
+preferencesMenu.addEventListener('toggle', () => {
+  const isOpen = preferencesMenu.hasAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', String(isOpen));
+});
+
+document.addEventListener('click', (event) => {
+  if (!preferencesMenu.hasAttribute('open')) return;
+  if (preferencesMenu.contains(event.target)) return;
+  preferencesMenu.removeAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', 'false');
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || !preferencesMenu.hasAttribute('open')) return;
+  preferencesMenu.removeAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', 'false');
+  preferencesToggle.focus();
 });
 
 // ---------------------------------------------------------
@@ -107,11 +140,15 @@ syncIgnoreGroupVisibility();
 
 savePrefsBtn.addEventListener('click', () => {
   savePreferences(getOptions());
+  preferencesMenu.removeAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', 'false');
   announce('Preferences saved.');
 });
 
 resetPrefsBtn.addEventListener('click', () => {
   resetPreferences();
+  preferencesMenu.removeAttribute('open');
+  preferencesToggle.setAttribute('aria-expanded', 'false');
   announce('Preferences reset to defaults.');
 });
 
