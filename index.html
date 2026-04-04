@@ -84,7 +84,7 @@
 
       <fieldset class="option-group">
         <legend class="option-label">Quote Values</legend>
-        <div class="radio-group">
+        <div class="radio-group radio-group-vertical">
           <label class="radio-label">
             <input type="radio" name="quoteStyle" value="none" checked /> None
           </label>
@@ -99,7 +99,7 @@
 
       <fieldset class="option-group">
         <legend class="option-label">Input Mode</legend>
-        <div class="radio-group">
+        <div class="radio-group radio-group-vertical">
           <label class="radio-label">
             <input type="radio" name="inputMode" value="numeric" checked /> Numeric
           </label>
@@ -107,6 +107,16 @@
             <input type="radio" name="inputMode" value="nonnumeric" /> Non-numeric
           </label>
         </div>
+      </fieldset>
+
+      <fieldset class="option-group">
+        <legend class="option-label">Output Spacing</legend>
+        <div class="checkbox-group">
+          <label class="checkbox-label" for="includeDelimiterSpace">
+            <input type="checkbox" id="includeDelimiterSpace" checked /> Include a space after each delimiter
+          </label>
+        </div>
+        <span class="hint-text">Default output uses readable spacing such as value, value.</span>
       </fieldset>
 
       <div class="option-group ignore-group" id="ignoreGroup">

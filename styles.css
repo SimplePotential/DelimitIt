@@ -460,6 +460,12 @@ body {
   gap: 0.25rem 0.875rem;
 }
 
+.radio-group-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
 .radio-label {
   display: inline-flex;
   align-items: center;
@@ -471,6 +477,28 @@ body {
 }
 
 .radio-label input[type="radio"] {
+  accent-color: var(--color-accent);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
   accent-color: var(--color-accent);
   width: 1rem;
   height: 1rem;
@@ -583,7 +611,8 @@ body {
    13. Textareas
    --------------------------------------------------------- */
 .text-area {
-  flex: 1;
+  flex: none;
+  display: block;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   line-height: 1.6;
@@ -591,6 +620,7 @@ body {
   background-color: var(--color-surface);
   border: none;
   resize: vertical;
+  overflow: auto;
   padding: 0.875rem;
   min-height: 320px;
   width: 100%;

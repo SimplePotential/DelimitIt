@@ -21,6 +21,7 @@ const exportBtn     = document.getElementById('exportBtn');
 const importBtn     = document.getElementById('importBtn');
 const fileInput     = document.getElementById('fileInput');
 const delimiterInput = document.getElementById('delimiter');
+const includeDelimiterSpaceInput = document.getElementById('includeDelimiterSpace');
 const ignoreCharsInput = document.getElementById('ignoreChars');
 const savePrefsBtn  = document.getElementById('savePrefsBtn');
 const resetPrefsBtn = document.getElementById('resetPrefsBtn');
@@ -30,6 +31,7 @@ const statusMsg     = document.getElementById('statusMsg');
 const PREFERENCES_KEY = 'delimitit-preferences';
 const DEFAULT_PREFERENCES = {
   delimiter: ',',
+  includeDelimiterSpace: true,
   quoteStyle: 'none',
   inputMode: 'numeric',
   ignoreChars: ''
@@ -47,6 +49,11 @@ const DEFAULT_PREFERENCES = {
 
 (function initPreferences() {
   applyPreferences(loadSavedPreferences());
+})();
+
+(function initSynchronizedTextareaHeights() {
+  syncTextareaHeights();
+  setupTextareaResizeSync();
 })();
 
 function applyTheme(theme, persist = true) {
@@ -228,11 +235,12 @@ function tokenizeNonNumeric(text, ignoreChars) {
  * @returns {string}
  */
 function buildOutput(tokens, delimiter, quoteStyle) {
+  const joiner = delimiter + (includeDelimiterSpaceInput.checked ? ' ' : '');
   let q = '';
   if (quoteStyle === 'single') q = "'";
   if (quoteStyle === 'double') q = '"';
 
-  return tokens.map((t) => `${q}${t}${q}`).join(delimiter);
+  return tokens.map((t) => `${q}${t}${q}`).join(joiner);
 }
 
 // ---------------------------------------------------------
@@ -245,9 +253,10 @@ function getOptions() {
 
   const quoteStyle = document.querySelector('input[name="quoteStyle"]:checked').value;
   const inputMode  = getInputMode();
+  const includeDelimiterSpace = includeDelimiterSpaceInput.checked;
   const ignoreChars = ignoreCharsInput.value; // raw chars string
 
-  return { delimiter, quoteStyle, inputMode, ignoreChars };
+  return { delimiter, includeDelimiterSpace, quoteStyle, inputMode, ignoreChars };
 }
 
 function loadSavedPreferences() {
@@ -260,6 +269,9 @@ function loadSavedPreferences() {
       delimiter: typeof parsed.delimiter === 'string' && parsed.delimiter.length > 0
         ? parsed.delimiter
         : DEFAULT_PREFERENCES.delimiter,
+      includeDelimiterSpace: typeof parsed.includeDelimiterSpace === 'boolean'
+        ? parsed.includeDelimiterSpace
+        : DEFAULT_PREFERENCES.includeDelimiterSpace,
       quoteStyle: ['none', 'single', 'double'].includes(parsed.quoteStyle)
         ? parsed.quoteStyle
         : DEFAULT_PREFERENCES.quoteStyle,
@@ -277,6 +289,7 @@ function loadSavedPreferences() {
 
 function applyPreferences(preferences) {
   delimiterInput.value = preferences.delimiter;
+  includeDelimiterSpaceInput.checked = preferences.includeDelimiterSpace;
   ignoreCharsInput.value = preferences.ignoreChars;
 
   const quoteStyleRadio = document.querySelector(`input[name="quoteStyle"][value="${preferences.quoteStyle}"]`);
@@ -300,6 +313,36 @@ function savePreferences(preferences) {
 function resetPreferences() {
   localStorage.removeItem(PREFERENCES_KEY);
   applyPreferences(DEFAULT_PREFERENCES);
+}
+
+function syncTextareaHeights(sourceHeight) {
+  const fallbackHeight = Math.max(inputText.offsetHeight, outputText.offsetHeight, 320);
+  const targetHeight = Math.max(sourceHeight || fallbackHeight, 160);
+  inputText.style.height = `${targetHeight}px`;
+  outputText.style.height = `${targetHeight}px`;
+}
+
+function setupTextareaResizeSync() {
+  if (typeof ResizeObserver !== 'function') {
+    return;
+  }
+
+  let syncing = false;
+  const resizeObserver = new ResizeObserver((entries) => {
+    if (syncing || entries.length === 0) {
+      return;
+    }
+
+    syncing = true;
+    const resizedHeight = Math.round(entries[0].target.getBoundingClientRect().height);
+    syncTextareaHeights(resizedHeight);
+    requestAnimationFrame(() => {
+      syncing = false;
+    });
+  });
+
+  resizeObserver.observe(inputText);
+  resizeObserver.observe(outputText);
 }
 
 // ---------------------------------------------------------

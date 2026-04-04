@@ -33,7 +33,7 @@ This project is a simple static web app with no build step and no external depen
 
 To use it:
 
-1. Open `index.html` in a web browser.
+1. Open `https://simplepotential.github.io/DelimitIt/` in a web browser.
 2. Paste text into the input area or import a supported file.
 3. Choose the delimiter, quote style, and input mode.
 4. Click **Convert**.
