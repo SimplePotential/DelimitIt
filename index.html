@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DelimitIt</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="app-title">
+        <span class="app-title-delimit">Delimit</span><span class="app-title-it">It</span>
+      </h1>
+      <button id="themeToggle" class="btn btn-icon" aria-label="Switch to dark mode" aria-pressed="false">
+        <svg class="icon icon-sun" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon icon-moon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span class="theme-label">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- Options Bar -->
+    <section class="options-bar" aria-label="Conversion options">
+
+      <div class="option-group">
+        <label class="option-label" for="delimiter">Delimiter</label>
+        <input
+          type="text"
+          id="delimiter"
+          class="option-input delimiter-input"
+          value=","
+          maxlength="2"
+          aria-describedby="delimiterHint"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span id="delimiterHint" class="hint-text">Type a character, or press Tab for a tab character</span>
+      </div>
+
+      <fieldset class="option-group">
+        <legend class="option-label">Quote Values</legend>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="quoteStyle" value="none" checked /> None
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="quoteStyle" value="single" /> Single&nbsp;<span class="quote-preview">'</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="quoteStyle" value="double" /> Double&nbsp;<span class="quote-preview">"</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="option-group">
+        <legend class="option-label">Input Mode</legend>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="inputMode" value="nonnumeric" checked /> Non-numeric
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="inputMode" value="numeric" /> Numeric
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="option-group ignore-group" id="ignoreGroup">
+        <label class="option-label" for="ignoreChars">Ignore Characters</label>
+        <input
+          type="text"
+          id="ignoreChars"
+          class="option-input"
+          placeholder="e.g. space, $"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="ignoreHint"
+        />
+        <span id="ignoreHint" class="hint-text">Characters to keep inside tokens (not treated as delimiters)</span>
+      </div>
+
+    </section><!-- /options-bar -->
+
+    <!-- Text Panels -->
+    <div class="panels">
+
+      <section class="panel panel-input" aria-labelledby="inputLabel">
+        <div class="panel-header">
+          <label class="panel-label" id="inputLabel" for="inputText">Input Text</label>
+          <div class="panel-actions">
+            <button id="importBtn" class="btn btn-secondary btn-sm" aria-label="Import text from file">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Import
+            </button>
+            <input type="file" id="fileInput" accept=".txt,.csv,.tsv" aria-hidden="true" tabindex="-1" />
+            <button id="clearBtn" class="btn btn-secondary btn-sm" aria-label="Clear input text">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Clear
+            </button>
+          </div>
+        </div>
+        <textarea
+          id="inputText"
+          class="text-area"
+          placeholder="Paste or type your data here…"
+          spellcheck="false"
+          aria-required="true"
+        ></textarea>
+      </section>
+
+      <div class="convert-column">
+        <button id="convertBtn" class="btn btn-primary btn-convert" aria-label="Convert input to delimited list">
+          Convert
+          <svg class="icon icon-arrow" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+
+      <section class="panel panel-output" aria-labelledby="outputLabel">
+        <div class="panel-header">
+          <label class="panel-label" id="outputLabel" for="outputText">Output</label>
+          <div class="panel-actions">
+            <button id="copyBtn" class="btn btn-secondary btn-sm" aria-label="Copy output to clipboard" disabled>
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy
+            </button>
+            <button id="exportBtn" class="btn btn-secondary btn-sm" aria-label="Export output to text file" disabled>
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+        <textarea
+          id="outputText"
+          class="text-area"
+          readonly
+          placeholder="Delimited results will appear here…"
+          spellcheck="false"
+          aria-live="polite"
+          aria-atomic="true"
+        ></textarea>
+      </section>
+
+    </div><!-- /panels -->
+
+  </main>
+
+  <!-- Accessible status announcements -->
+  <div id="statusMsg" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="site-footer">
+    <p>DelimitIt &mdash; Convert any text to a delimited list</p>
+  </footer>
+
+</body>
+</html>
