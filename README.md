@@ -28,6 +28,8 @@ DelimitIt reads the input text, extracts tokens based on the selected input mode
 Numeric mode is designed for pulling numbers out of mixed content.
 
 - Digits and decimal points are treated as part of a value
+- A leading dash is preserved when it represents a negative number
+- Values wrapped in parentheses, such as `(123.45)`, are converted to dash-prefixed negatives such as `-123.45`
 - Other characters are treated as separators
 - Useful for invoice numbers, IDs, values from copied reports, and mixed strings containing numbers
 
@@ -41,6 +43,20 @@ Example output with comma delimiter:
 
 ```text
 1001, 1002, 1003
+```
+
+Negative values are also supported.
+
+Example input:
+
+```text
+Credits: -12.5 | (45) | 88
+```
+
+Example output with comma delimiter:
+
+```text
+-12.5, -45, 88
 ```
 
 ### Non-numeric Mode
@@ -96,7 +112,7 @@ Examples:
 
 Controls how DelimitIt detects token boundaries.
 
-- Numeric: extract numbers from mixed text
+- Numeric: extract numbers from mixed text, including dash-prefixed negatives and parenthesized negatives
 - Non-numeric: extract general text values
 
 ### Output Spacing

@@ -165,19 +165,30 @@ resetPrefsBtn.addEventListener('click', () => {
 
 /**
  * Numeric mode:
- *   Any character that is not a digit or a decimal point is
- *   treated as a separator. Consecutive separators collapse.
+ *   Extract signed numeric values from mixed content.
+ *   Values wrapped in parentheses are treated as negatives.
  *
  * @param {string} text
  * @returns {string[]}
  */
 function tokenizeNumeric(text) {
-  // Replace any run of non-numeric chars (not digit/decimal) with a single space
-  return text
-    .replace(/[^0-9.]+/g, '\x00')
-    .split('\x00')
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0 && t !== '.');
+  if (!text) return [];
+
+  const normalized = normalizeParenthesizedNegatives(text);
+  const matches = normalized.match(/(?<![\w.])-?(?:\d+\.?\d*|\.\d+)/g);
+
+  return matches ? matches.filter((token) => token !== '.') : [];
+}
+
+/**
+ * Convert accounting-style negatives such as (123.45) into -123.45
+ * before extracting numeric tokens.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+function normalizeParenthesizedNegatives(text) {
+  return text.replace(/\(\s*(\d+\.?\d*|\.\d+)\s*\)/g, '-$1');
 }
 
 /**
