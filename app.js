@@ -175,9 +175,79 @@ function tokenizeNumeric(text) {
   if (!text) return [];
 
   const normalized = normalizeParenthesizedNegatives(text);
-  const matches = normalized.match(/(?<![\w.])-?(?:\d+\.?\d*|\.\d+)/g);
+  const tokens = [];
 
-  return matches ? matches.filter((token) => token !== '.') : [];
+  for (let index = 0; index < normalized.length; index += 1) {
+    const token = readNumericToken(normalized, index);
+
+    if (!token) continue;
+
+    tokens.push(token.value);
+    index = token.endIndex;
+  }
+
+  return tokens;
+}
+
+/**
+ * Read a numeric token starting at a specific index.
+ * A decimal point is only kept when it is followed by a digit.
+ *
+ * @param {string} text
+ * @param {number} startIndex
+ * @returns {{ value: string, endIndex: number } | null}
+ */
+function readNumericToken(text, startIndex) {
+  let index = startIndex;
+  let value = '';
+  let hasDigits = false;
+
+  if (text[index] === '-' && canStartSignedNumber(text, index)) {
+    value += '-';
+    index += 1;
+  }
+
+  while (index < text.length && /\d/.test(text[index])) {
+    value += text[index];
+    index += 1;
+    hasDigits = true;
+  }
+
+  if (text[index] === '.' && /\d/.test(text[index + 1] || '')) {
+    value += '.';
+    index += 1;
+
+    while (index < text.length && /\d/.test(text[index])) {
+      value += text[index];
+      index += 1;
+      hasDigits = true;
+    }
+  }
+
+  if (!hasDigits) return null;
+
+  return {
+    value,
+    endIndex: index - 1
+  };
+}
+
+/**
+ * A dash starts a negative number only when it appears at the start of the
+ * input or after a non-word separator, and the next character begins a number.
+ *
+ * @param {string} text
+ * @param {number} index
+ * @returns {boolean}
+ */
+function canStartSignedNumber(text, index) {
+  const previousChar = text[index - 1] || '';
+  const nextChar = text[index + 1] || '';
+
+  if (!/\d|\./.test(nextChar)) return false;
+  if (!previousChar) return true;
+
+  return !/[\w.]/.test(previousChar);
 }
 
 /**
