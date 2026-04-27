@@ -28,6 +28,15 @@ const resetPrefsBtn = document.getElementById('resetPrefsBtn');
 const ignoreGroup   = document.getElementById('ignoreGroup');
 const statusMsg     = document.getElementById('statusMsg');
 
+const TOAST_DURATION_MS = 4000;
+const TOAST_TRANSITION_MS = 180;
+const MAX_PENDING_TOASTS = 8;
+
+let toastContainer = null;
+let activeToast = null;
+let toastTimer = null;
+let toastQueue = [];
+
 const PREFERENCES_KEY = 'delimitit-preferences';
 const DEFAULT_PREFERENCES = {
   delimiter: ',',
@@ -111,7 +120,7 @@ delimiterInput.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     e.preventDefault();
     delimiterInput.value = '\t';
-    announce('Delimiter set to Tab');
+    showToast('Delimiter set to Tab');
   }
 });
 
@@ -146,17 +155,29 @@ document.querySelectorAll('input[name="inputMode"]').forEach((radio) => {
 syncIgnoreGroupVisibility();
 
 savePrefsBtn.addEventListener('click', () => {
-  savePreferences(getOptions());
-  preferencesMenu.removeAttribute('open');
-  preferencesToggle.setAttribute('aria-expanded', 'false');
-  announce('Preferences saved.');
+  try {
+    savePreferences(getOptions());
+    preferencesMenu.removeAttribute('open');
+    preferencesToggle.setAttribute('aria-expanded', 'false');
+    showToast('Preferences saved.', 'success');
+  } catch {
+    preferencesMenu.removeAttribute('open');
+    preferencesToggle.setAttribute('aria-expanded', 'false');
+    showToast('Preferences could not be saved.', 'error');
+  }
 });
 
 resetPrefsBtn.addEventListener('click', () => {
-  resetPreferences();
-  preferencesMenu.removeAttribute('open');
-  preferencesToggle.setAttribute('aria-expanded', 'false');
-  announce('Preferences reset to defaults.');
+  try {
+    resetPreferences();
+    preferencesMenu.removeAttribute('open');
+    preferencesToggle.setAttribute('aria-expanded', 'false');
+    showToast('Preferences reset to defaults.', 'success');
+  } catch {
+    preferencesMenu.removeAttribute('open');
+    preferencesToggle.setAttribute('aria-expanded', 'false');
+    showToast('Preferences could not be reset.', 'error');
+  }
 });
 
 // ---------------------------------------------------------
@@ -446,7 +467,7 @@ function convert() {
   if (!raw.trim()) {
     outputText.value = '';
     setOutputEnabled(false);
-    announce('No input text to convert.');
+    showToast('No input text to convert.', 'error');
     return;
   }
 
@@ -462,14 +483,14 @@ function convert() {
   if (tokens.length === 0) {
     outputText.value = '';
     setOutputEnabled(false);
-    announce('No valid tokens found in the input.');
+    showToast('No valid tokens found in the input.', 'error');
     return;
   }
 
   const result = buildOutput(tokens, delimiter, quoteStyle);
   outputText.value = result;
   setOutputEnabled(true);
-  announce(`Converted ${tokens.length} item${tokens.length !== 1 ? 's' : ''}.`);
+  showToast(`Converted ${tokens.length} item${tokens.length !== 1 ? 's' : ''}.`, 'success');
 }
 
 // ---------------------------------------------------------
@@ -488,7 +509,6 @@ clearBtn.addEventListener('click', () => {
   outputText.value = '';
   setOutputEnabled(false);
   inputText.focus();
-  announce('Input cleared.');
 });
 
 // ---------------------------------------------------------
@@ -506,11 +526,11 @@ fileInput.addEventListener('change', () => {
   const reader = new FileReader();
   reader.onload = (e) => {
     inputText.value = e.target.result;
-    announce(`File "${file.name}" imported.`);
+    showToast(`File "${file.name}" imported.`, 'success');
     inputText.focus();
   };
   reader.onerror = () => {
-    announce('Error reading file. Please try again.');
+    showToast('Error reading file. Please try again.', 'error');
   };
   reader.readAsText(file, 'UTF-8');
 });
@@ -548,7 +568,7 @@ function fallbackCopy(text) {
     document.execCommand('copy');
     onCopied();
   } catch {
-    announce('Copy failed. Please select the output text and copy manually.');
+    showToast('Copy failed. Please select the output text and copy manually.', 'error');
   } finally {
     document.body.removeChild(tmp);
   }
@@ -560,7 +580,7 @@ function onCopied() {
   const originalHTML = copyBtn.innerHTML;
   copyBtn.innerHTML = '<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
   copyBtn.classList.add('btn-copied');
-  announce('Output copied to clipboard.');
+  showToast('Output copied to clipboard.', 'success');
   copyResetTimer = setTimeout(() => {
     copyBtn.innerHTML = originalHTML;
     copyBtn.classList.remove('btn-copied');
@@ -589,19 +609,94 @@ exportBtn.addEventListener('click', () => {
     URL.revokeObjectURL(url);
   }, 100);
 
-  announce('File downloaded as delimited-output.txt');
+  showToast('File downloaded as delimited-output.txt', 'success');
 });
 
 // ---------------------------------------------------------
-//  Accessible status announcements
+//  Toast notifications
 // ---------------------------------------------------------
-let announceTimer = null;
+function ensureToastContainer() {
+  if (toastContainer) {
+    return toastContainer;
+  }
 
-function announce(message) {
-  clearTimeout(announceTimer);
+  toastContainer = document.createElement('div');
+  toastContainer.className = 'toast-container';
+  toastContainer.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(toastContainer);
+  return toastContainer;
+}
+
+function announceStatus(message) {
   statusMsg.textContent = '';
-  // Brief delay so screen readers re-announce on repeated messages
-  announceTimer = setTimeout(() => {
-    statusMsg.textContent = message;
-  }, 50);
+  void statusMsg.offsetHeight;
+  statusMsg.textContent = message;
+}
+
+function enqueueToast(message, type) {
+  const pendingToast = toastQueue[toastQueue.length - 1];
+
+  if (pendingToast && pendingToast.message === message && pendingToast.type === type) {
+    return;
+  }
+
+  if (toastQueue.length >= MAX_PENDING_TOASTS) {
+    toastQueue.shift();
+  }
+
+  toastQueue.push({ message, type });
+}
+
+function removeToast(toast, onComplete) {
+  if (!toast) {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
+
+  toast.classList.remove('is-visible');
+  toast.classList.add('is-hiding');
+  window.setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+    if (activeToast === toast) {
+      activeToast = null;
+    }
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+  }, TOAST_TRANSITION_MS);
+}
+
+function processToastQueue() {
+  if (activeToast || toastQueue.length === 0) {
+    return;
+  }
+
+  const container = ensureToastContainer();
+  const nextToast = toastQueue.shift();
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${nextToast.type}`;
+  toast.textContent = nextToast.message;
+
+  announceStatus(nextToast.message);
+  container.appendChild(toast);
+  activeToast = toast;
+
+  clearTimeout(toastTimer);
+
+  window.requestAnimationFrame(() => {
+    toast.classList.add('is-visible');
+  });
+
+  toastTimer = window.setTimeout(() => {
+    removeToast(toast, processToastQueue);
+  }, TOAST_DURATION_MS);
+}
+
+function showToast(message, type = 'info') {
+  enqueueToast(message, type);
+  processToastQueue();
 }

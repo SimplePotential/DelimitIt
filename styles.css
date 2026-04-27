@@ -26,6 +26,7 @@
 
   /* Status / interactive */
   --color-success:      #1a7a4a;
+  --color-danger:       #b42318;
   --color-focus-ring:   #1a7fc1;
 
   /* Header */
@@ -64,6 +65,7 @@
   --color-accent-light: #1a2f45;
 
   --color-success:      #34c47a;
+  --color-danger:       #ff8a7a;
   --color-focus-ring:   #3ba8e8;
 
   --color-header-bg:    #0d1320;
@@ -92,6 +94,7 @@
     --color-accent-hover: #6dc0f0;
     --color-accent-light: #1a2f45;
     --color-success:      #34c47a;
+    --color-danger:       #ff8a7a;
     --color-focus-ring:   #3ba8e8;
     --color-header-bg:    #0d1320;
     --color-header-text:  #e4e9f2;
@@ -139,6 +142,56 @@ body {
   clip: rect(0,0,0,0);
   white-space: nowrap;
   border: 0;
+}
+
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  width: min(calc(100vw - 2rem), 36rem);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.toast {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-light));
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-0.75rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+  word-break: break-word;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.is-hiding {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
+.toast-success {
+  border-color: color-mix(in srgb, var(--color-success) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-surface) 82%, var(--color-success) 18%);
+}
+
+.toast-error {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-surface) 82%, var(--color-danger) 18%);
 }
 
 /* ---------------------------------------------------------
@@ -751,6 +804,16 @@ body {
     align-items: flex-start;
     gap: 0.4rem;
   }
+
+  .toast-container {
+    top: 0.75rem;
+    width: min(calc(100vw - 1rem), 32rem);
+  }
+
+  .toast {
+    padding: 0.85rem 0.9rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* ---------------------------------------------------------
@@ -760,6 +823,12 @@ body {
   background-color: var(--color-success) !important;
   border-color: var(--color-success) !important;
   color: #ffffff !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
 }
 
 /* ---------------------------------------------------------
